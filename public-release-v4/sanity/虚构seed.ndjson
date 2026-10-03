@@ -1,0 +1,2 @@
+{"_id":"demo-claim-v1","_type":"claim","version":1,"text":"所有格式都兼容","formats":["*"],"encodings":["*"],"evidenceRefs":[{"_type":"reference","_ref":"demo-evidence-csv"}],"createdAt":"2026-10-01T00:00:00Z"}
+{"_id":"demo-evidence-csv","_type":"evidence","title":"虚构验证：UTF-8 CSV读入","formats":["CSV"],"encodings":["UTF-8"],"result":"supports","source":"本地自拟 fixture-source.csv；非真实产品测试","detail":"仅演示一份UTF-8 CSV；未测XLSX、其他编码或任意文件。","createdAt":"2026-10-01T00:00:00Z"}

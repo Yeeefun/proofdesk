@@ -1,0 +1,59 @@
+---
+const mode='sanity';
+import {copyFor} from '../lib/ui-language.mjs';
+const lang='zh';
+const c=copyFor(lang);
+---
+<!doctype html>
+<html lang={lang==='en'?'en':'zh-CN'}>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>ProofDesk · {c.brand}</title>
+<style>
+  .header-tools{display:flex;flex-direction:column;align-items:flex-end;gap:12px}.languages{display:flex;gap:14px;font-size:15px}.languages a{padding:4px 7px}.languages [aria-current="page"]{font-weight:700;text-decoration-thickness:2px}.original-text{overflow-wrap:anywhere;color:#596a6b}html[lang="en"] h1 span{display:block;font-size:19px;letter-spacing:0;font-weight:500}@media(max-width:720px){.header-tools{align-items:flex-start}}
+  [hidden]{display:none!important}
+  :root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#203c42;background:#f5f2ea;line-height:1.65}body{margin:0}main{max-width:1120px;padding:36px 24px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:18px}h1{margin:0;font-size:38px;letter-spacing:-1px}h2{font-size:23px;margin:0 0 14px}h3{font-size:19px}p{margin:10px 0}a{color:#255b70}small,.muted{color:#596a6b}.banner{padding:14px 18px;background:#e4ebcb;border-left:4px solid #839649;margin:24px 0}.mode{border:1px solid #829092;border-radius:99px;padding:6px 13px;white-space:nowrap}.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px}.panel{background:#fffdf8;border:1px solid #d7dbd0;border-radius:15px;padding:25px;margin-bottom:20px}.quote{font-size:32px;font-weight:650;line-height:1.3;margin:20px 0}.badge{display:inline-block;font-weight:650;padding:5px 10px;background:#f1decf;border-radius:7px}.badge.good{background:#dceacc}.badge.review{background:#f1dbc5}.status-reason{min-height:54px}.scope{padding:10px 0;border-top:1px solid #dce0d9}.evidence{padding:15px 0;border-bottom:1px solid #dde0d5}.evidence:last-child{border:0}textarea{font:inherit;box-sizing:border-box;width:100%;min-height:94px;border:1px solid #929f9b;border-radius:8px;padding:10px;background:white}label{display:block;margin:14px 0 7px}button{font:inherit;background:#244b52;color:white;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;margin:14px 8px 0 0}button.secondary{background:#f2e3d7;color:#693b24}button:disabled{opacity:.45;cursor:not-allowed}details{margin:14px 0;border-top:1px solid #d9ddd2;padding-top:14px}summary{cursor:pointer;font-weight:600}.record{padding:14px 0;border-bottom:1px solid #e1e4dc;overflow-wrap:anywhere}.record p{margin:5px 0}.id{font-size:12px;color:#63777b;overflow-wrap:anywhere}.error{color:#922f21;font-weight:600}footer{margin:25px 0;color:#657472}#notice{min-height:26px}#loading{padding:30px}ol{padding-left:24px}.hint{font-size:14px}@media(max-width:720px){main{padding:22px 14px}header{display:block}h1{font-size:31px}.mode{display:inline-block;margin-top:10px}.grid{display:block}.panel{padding:19px}.quote{font-size:27px}}
+</style><script is:inline>
+  if(location.pathname==='/' && new URLSearchParams(location.search).get('lang')==='en') location.replace('/en/');
+</script></head>
+<body><main>
+<header><div><h1>ProofDesk <span class="muted">/ {c.brand}</span></h1><p>{c.subtitle}</p></div><div class="header-tools"><span class="mode" id="mode">{mode==='local'?c.localPending:c.cloudPending}</span><nav aria-label="Language / 语言" class="languages"><a href="/" lang="zh-CN" aria-current={lang==='zh'?'page':undefined}>中文</a><a href="/en/" lang="en" aria-current={lang==='en'?'page':undefined}>English</a></nav></div></header>
+<div class="banner">{c.banner}</div>
+<p class="hint" hidden={lang!=='en'}>{c.translation}</p>
+<div id="loading" role="status">{c.loading}</div>
+<div class="grid" id="workspace" hidden>
+<section><div class="panel"><h2>{c.claim}</h2><div class="quote" id="claim"></div><p class="hint original-text" id="claim-original" hidden></p><span class="badge" id="status"></span><p class="status-reason" id="reason"></p><div class="scope" id="scope"></div><p class="hint">{c.scopeHint}</p></div>
+<div class="panel"><h2>{mode==='local'?c.localHeading:c.cloudHeading}</h2><p>{mode==='local'?c.localIntro:c.cloudIntro}</p><div hidden={mode!=='local'}><label for="review-reason">{c.reasonLabel}</label><textarea id="review-reason" maxlength="500" placeholder={c.reasonPlaceholder}></textarea><button id="approve">{c.approve}</button><button class="secondary" id="withdraw">{c.withdraw}</button><p id="notice" role="status" aria-live="polite"></p><p class="hint">{c.actorHint}</p></div></div></section>
+<section><div class="panel"><h2>{c.evidence}</h2><div id="evidence"></div><a href="/fixture-source.csv">{c.fixture}</a><p class="hint">{c.fixtureHint}</p></div>
+<div class="panel"><h2>{c.history}</h2><p id="counts"></p><details open><summary>{c.historySummary}</summary><div id="history"></div></details><p class="hint">{c.historyHint}</p></div></section>
+</div>
+<footer>{mode==='local'?c.localPath:c.cloudPath}<br/>{c.noFallback}</footer>
+</main>
+<script>
+import {copyFor,recordText,assessmentText,countText} from '../lib/ui-language.mjs';
+const lang=document.documentElement.lang==='en'?'en':'zh';
+const c=copyFor(lang);
+let currentData;
+const $=id=>document.getElementById(id);
+const text=(id,value)=>{$(id).textContent=value;};
+const translated=value=>recordText(value,lang);
+function item(title,body,id,original=''){const el=document.createElement('div');el.className='record';const h=document.createElement('strong');h.textContent=title;const p=document.createElement('p');p.textContent=body;const s=document.createElement('div');s.className='id';s.textContent=id;el.append(h,p,s);if(lang==='en'&&original){const d=document.createElement('details');const summary=document.createElement('summary');summary.textContent=c.original;const raw=document.createElement('p');raw.className='original-text';raw.textContent=original;d.append(summary,raw);el.append(d);}return el;}
+async function refresh(){
+  try{const response=await fetch('/api/state',{cache:'no-store'});const data=await response.json();if(!response.ok)throw new Error(data.error);currentData=data;
+    $('loading').hidden=true;$('workspace').hidden=false;text('mode',data.mode==='local'?c.localReady:c.cloudReady);
+    const assessment=assessmentText(data.assessment,lang,!!data.current);
+    text('claim',data.current?translated(data.current.text):c.noClaim);text('status',assessment.label);text('reason',assessment.reason);$('status').className='badge '+(data.assessment.code==='reviewed_supported'?'good':'review');
+    $('claim-original').hidden=lang!=='en'||!data.current;text('claim-original',data.current?`${c.original}: ${data.current.text}`:'');
+    text('scope',`${c.format}: ${data.current?.formats.join(', ')||c.unknown} / ${c.encoding}: ${data.current?.encodings.join(', ')||c.unknown} (${c.wildcard})`);
+    const activeIds=new Set(data.assessment.active.map(e=>e._id));const allIds=new Set((data.current?.evidenceRefs||[]).map(r=>r._ref));$('evidence').replaceChildren();
+    for(const e of data.state.evidence.filter(e=>allIds.has(e._id))){$('evidence').append(item(translated(e.title)+' · '+(activeIds.has(e._id)?c.active:c.withdrawn),`${e.formats.join(', ')} / ${e.encodings.join(', ')}. ${translated(e.detail)} ${c.source}: ${translated(e.source)}`,e._id,`${e.title} | ${e.detail} | ${e.source}`));}
+    if(!allIds.size||!data.state.evidence.some(e=>allIds.has(e._id))) $('evidence').append(item(c.noEvidence,c.noEvidenceReason,''));
+    text('counts',countText(data.state,lang));
+    $('history').replaceChildren();for(const claim of data.state.claims){$('history').append(item(`${c.version} v${claim.version}: ${translated(claim.text)}`,claim.createdAt,claim._id,claim.text));}for(const d of data.state.decisions){$('history').append(item(d.action==='approve'?c.approveRecord:c.withdrawRecord,`${translated(d.reason)} · ${translated(d.actor)} · ${d.createdAt}`,d._id,`${d.reason} | ${d.actor}`));}
+    $('approve').disabled=data.mode!=='local'||data.current?.text==='已验证UTF-8 CSV'||!activeIds.size||data.assessment.code==='counterevidence';$('withdraw').disabled=data.mode!=='local'||!activeIds.size;
+  }catch(error){$('workspace').hidden=true;$('loading').hidden=false;$('loading').className='error';$('loading').textContent=c.readFailure; text('mode',c.failureMode);}
+}
+async function act(action){const reason=$('review-reason').value.trim();if(!reason){text('notice',c.reasonRequired);return;}const evidenceId=currentData.assessment.active[0]?._id;const buttons=[$('approve'),$('withdraw')];buttons.forEach(b=>b.disabled=true);
+  try{const response=await fetch('/api/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,reason,evidenceId})});const body=await response.json();if(!response.ok)throw new Error(body.error);$('review-reason').value='';text('notice',c.saved);await refresh();}catch(e){text('notice',c.actionFailed);await refresh();}}
+$('approve').addEventListener('click',()=>act('approve_narrow'));$('withdraw').addEventListener('click',()=>act('withdraw'));refresh();
+</script>
+</body></html>
+
